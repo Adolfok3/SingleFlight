@@ -10,7 +10,7 @@
 [![main](https://github.com/Adolfok3/SingleFlight/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/Adolfok3/SingleFlight/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/Adolfok3/SingleFlight/branch/main/graph/badge.svg)](https://codecov.io/gh/Adolfok3/SingleFlight)
 
-Suppresses duplicate concurrent calls so identical in-flight work runs once and all callers share the result.
+A simple, lightweight, zero-dependency .NET Package that stops duplicate concurrent calls: identical in-flight work runs just once and every caller shares the result.
 
 ## Requirements
 

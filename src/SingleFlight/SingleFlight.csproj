@@ -4,7 +4,7 @@
 		<LangVersion>latest</LangVersion>
 		<PackageId>SingleFlight</PackageId>
 		<Authors>Adolfok3</Authors>
-		<Description>Suppresses duplicate concurrent calls so identical in-flight work runs once and all callers share the result.</Description>
+		<Description>A simple, lightweight, zero-dependency library that stops duplicate concurrent calls: identical in-flight work runs just once and every caller shares the result.</Description>
 		<RepositoryUrl>https://github.com/Adolfok3/SingleFlight</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<PackageIcon>icon.png</PackageIcon>
