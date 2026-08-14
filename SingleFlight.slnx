@@ -1,0 +1,21 @@
+<Solution>
+  <Folder Name="/1 - Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="README.md" />
+  </Folder>
+  <Folder Name="/1 - Solution Items/src/">
+    <File Path="src/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/1 - Solution Items/tests/">
+    <File Path="tests/Directory.Build.props" />
+  </Folder>
+  <Folder Name="/2 - src/">
+    <Project Path="src/SingleFlight/SingleFlight.csproj" Id="f018dc15-bda1-422a-b602-cbdcd080a857" />
+  </Folder>
+  <Folder Name="/3 - tests/">
+    <Project Path="tests/SingleFlight.Tests/SingleFlight.Tests.csproj" Id="db33d0f4-a890-4246-a88d-2f201acd0301" />
+  </Folder>
+</Solution>

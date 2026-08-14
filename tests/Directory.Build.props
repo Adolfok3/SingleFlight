@@ -1,0 +1,31 @@
+<Project>
+	<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" />
+	<PropertyGroup>
+		<IsPackable>false</IsPackable>
+		<IsTestProject>true</IsTestProject>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.NET.Test.Sdk" />
+		<PackageReference Include="xunit" />
+		<PackageReference Include="xunit.runner.visualstudio" />
+		<PackageReference Include="xunit.analyzers" />
+		<PackageReference Include="coverlet.collector" />
+		<PackageReference Include="coverlet.msbuild" />
+		<PackageReference Include="NSubstitute" />
+		<PackageReference Include="FluentAssertions" />
+		<PackageReference Include="FluentAssertions.Analyzers" />
+		<PackageReference Include="Meziantou.FluentAssertionsAnalyzers" />
+		<PackageReference Include="NSubstitute.Analyzers.CSharp" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\..\src\$([System.String]::Copy('$(MSBuildProjectName)').Replace('.Tests', ''))\$([System.String]::Copy('$(MSBuildProjectName)').Replace('.Tests', '')).csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Xunit" />
+		<Using Include="NSubstitute" />
+		<Using Include="FluentAssertions" />
+	</ItemGroup>
+</Project>

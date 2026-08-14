@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<PackageId>SingleFlight</PackageId>
+		<Authors>Adolfok3</Authors>
+		<Description>Suppresses duplicate concurrent calls so identical in-flight work runs once and all callers share the result.</Description>
+		<RepositoryUrl>https://github.com/Adolfok3/SingleFlight</RepositoryUrl>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageIcon>icon.png</PackageIcon>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+	</PropertyGroup>
+</Project>
