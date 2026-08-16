@@ -8,6 +8,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![.NET Standard 2.0](https://img.shields.io/badge/.NET%20Standard-2.0-512BD4)](https://learn.microsoft.com/dotnet/standard/net-standard)
 [![main](https://github.com/Adolfok3/SingleFlight/actions/workflows/main.yml/badge.svg?branch=main)](https://github.com/Adolfok3/SingleFlight/actions/workflows/main.yml)
+[![Tests: 24 passing](https://img.shields.io/badge/tests-24%20passing-brightgreen.svg)](https://github.com/Adolfok3/SingleFlight/actions/workflows/main.yml)
 [![codecov](https://codecov.io/gh/Adolfok3/SingleFlight/branch/main/graph/badge.svg)](https://codecov.io/gh/Adolfok3/SingleFlight)
 
 A simple, lightweight, zero-dependency .NET Package that stops duplicate concurrent calls: identical in-flight work runs just once and every caller shares the result.

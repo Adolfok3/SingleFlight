@@ -71,10 +71,29 @@ public class SingleFlightGroupTests
         using var provider = services.BuildServiceProvider();
         var group = provider.GetRequiredService<ISingleFlightGroup<User>>();
         var user = new User("ada");
+        var hitCount = 0;
+        var started = new TaskCompletionSource();
+        var release = new TaskCompletionSource();
 
-        var value = await group.RunAsync("user:ada", () => Task.FromResult(user));
+        async Task<User> Target()
+        {
+            Interlocked.Increment(ref hitCount);
+            started.SetResult();
+            await release.Task;
+            return user;
+        }
 
-        value.Should().BeSameAs(user);
+        var owner = group.RunAsync("user:ada", Target);
+        await started.Task;
+        var joiners = Enumerable.Range(0, 9)
+            .Select(_ => group.RunAsync("user:ada", Target))
+            .ToArray();
+
+        release.SetResult();
+        var values = await Task.WhenAll(joiners.Prepend(owner));
+
+        hitCount.Should().Be(1);
+        values.Should().OnlyContain(value => ReferenceEquals(value, user));
     }
 
     [Fact]
