@@ -45,8 +45,10 @@ every caller that arrives while the work is still in flight waits for and receiv
 > It is **not** a cache. An entry only lives while its call is in flight. As soon as the shared
 > execution finishes (successfully or not) the key is released, so the next call starts fresh.
 
-The API is a single static class, `SingleFlight<T>`, with one method: `RunAsync`, which returns the
-value directly. `T` is the type produced by the work.
+The simplest entry point is the static class `SingleFlight<T>` with `RunAsync`, which returns the value
+directly (`T` is the type produced by the work). For isolated scopes or dependency injection there is
+also the instance-based `SingleFlightGroup<T>`, and a `RunDetailedAsync` variant that reports whether a
+call was coalesced — both covered below.
 
 ## Usage
 
@@ -83,6 +85,39 @@ async Task<User> GetUserAsync(int id)
 Keys are scoped per `T`: `SingleFlight<User>` and `SingleFlight<Order>` never coalesce with each other,
 even for an equal key.
 
+### Knowing whether a call was coalesced
+
+`RunDetailedAsync` returns a `SingleFlightResult<T>` that carries both the value and a `Joined` flag —
+`true` when this caller attached to a call that was already in flight (it did **not** run the factory),
+`false` when this caller owned the execution. Useful for metrics, logging, or deciding whether *you* are
+responsible for a follow-up side effect:
+
+```csharp
+var (user, joined) = await SingleFlight<User>.RunDetailedAsync($"user:{id}", () => LoadUserAsync(id));
+if (!joined)
+    _metrics.RecordCacheStampedeAvoided();
+```
+
+### Isolated scopes and dependency injection
+
+The static `SingleFlight<T>` is a single process-wide scope per `T`. When you want **isolated
+keyspaces** — so unrelated features can't collide on an equal key — or you want to inject and unit-test
+the coalescer, use `SingleFlightGroup<T>` (which implements `ISingleFlightGroup<T>`):
+
+```csharp
+// Registration
+services.AddSingleton<ISingleFlightGroup<User>, SingleFlightGroup<User>>();
+
+// Usage
+public UserService(ISingleFlightGroup<User> flight) => _flight = flight;
+
+Task<User> GetUserAsync(int id) =>
+    _flight.RunAsync($"user:{id}", () => LoadUserAsync(id));
+```
+
+Each group owns its own set of in-flight keys, so two groups never coalesce with each other even for an
+equal key. You can also pass a custom key comparer — e.g. `new SingleFlightGroup<User>(StringComparer.OrdinalIgnoreCase)`.
+
 ### Exceptions
 
 If the factory fails, every caller joined to that call observes the **same** exception, and the key is
@@ -93,6 +128,9 @@ released so the next call is free to retry.
 | Member | Description |
 | ------ | ----------- |
 | `SingleFlight<T>.RunAsync(string key, Func<Task<T>> factory)` | Runs the factory once per in-flight key; concurrent callers with the same key share the returned value. |
+| `SingleFlight<T>.RunDetailedAsync(string key, Func<Task<T>> factory)` | Like `RunAsync`, but returns a `SingleFlightResult<T>` reporting whether this caller `Joined` an in-flight call. |
+| `SingleFlightGroup<T>` / `ISingleFlightGroup<T>` | An isolated, injectable coalescing scope with its own keyspace. Exposes the same `RunAsync` / `RunDetailedAsync`, plus a constructor taking a custom key comparer. |
+| `SingleFlightResult<T>` | Readonly struct carrying `Value` and `Joined`; deconstructs to `(value, joined)`. |
 
 ## Contributing
 

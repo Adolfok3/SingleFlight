@@ -140,6 +140,34 @@ public class SingleFlightTests
     }
 
     [Fact]
+    public async Task RunDetailedAsync_ForOwnerAndJoiner_ReportsJoinedPerCaller()
+    {
+        var key = Guid.NewGuid().ToString();
+        var started = new TaskCompletionSource();
+        var release = new TaskCompletionSource();
+
+        async Task<int> Factory()
+        {
+            started.TrySetResult();
+            await release.Task;
+            return 7;
+        }
+
+        var owner = SingleFlight<int>.RunDetailedAsync(key, Factory);
+        await started.Task;
+        var joiner = SingleFlight<int>.RunDetailedAsync(key, Factory);
+
+        release.SetResult();
+        var ownerResult = await owner;
+        var joinerResult = await joiner;
+
+        ownerResult.Joined.Should().BeFalse();
+        joinerResult.Joined.Should().BeTrue();
+        ownerResult.Value.Should().Be(7);
+        joinerResult.Value.Should().Be(7);
+    }
+
+    [Fact]
     public async Task RunAsync_WithNullKey_ThrowsArgumentNullException() =>
         await FluentActions
             .Awaiting(() => SingleFlight<int>.RunAsync(null!, () => Task.FromResult(1)))
