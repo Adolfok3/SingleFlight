@@ -13,6 +13,7 @@
 		<PackageReference Include="xunit.analyzers" />
 		<PackageReference Include="coverlet.collector" />
 		<PackageReference Include="coverlet.msbuild" />
+		<PackageReference Include="Microsoft.Extensions.DependencyInjection" />
 		<PackageReference Include="NSubstitute" />
 		<PackageReference Include="FluentAssertions" />
 		<PackageReference Include="FluentAssertions.Analyzers" />

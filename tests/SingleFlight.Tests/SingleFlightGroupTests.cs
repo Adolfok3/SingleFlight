@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using SingleFlight;
 
 namespace SingleFlight.Tests;
@@ -12,6 +13,68 @@ public class SingleFlightGroupTests
         var value = await group.RunAsync("key", () => Task.FromResult(42));
 
         value.Should().Be(42);
+    }
+
+    [Fact]
+    public async Task ServiceCollection_CanResolveSingleFlightGroup()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(typeof(SingleFlightGroup<>));
+
+        using var provider = services.BuildServiceProvider();
+        var group = provider.GetRequiredService<SingleFlightGroup<int>>();
+
+        var value = await group.RunAsync("key", () => Task.FromResult(42));
+
+        value.Should().Be(42);
+    }
+
+    [Fact]
+    public async Task ServiceCollection_CanResolveSingleFlightGroupInterfaceAsSingleton()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton(typeof(ISingleFlightGroup<>), typeof(SingleFlightGroup<>));
+
+        using var provider = services.BuildServiceProvider();
+        var first = provider.GetRequiredService<ISingleFlightGroup<int>>();
+        var second = provider.GetRequiredService<ISingleFlightGroup<int>>();
+        var started = new TaskCompletionSource();
+        var release = new TaskCompletionSource();
+        var calls = 0;
+
+        async Task<int> Factory()
+        {
+            Interlocked.Increment(ref calls);
+            started.TrySetResult();
+            await release.Task;
+            return 7;
+        }
+
+        var owner = first.RunAsync("key", Factory);
+        await started.Task;
+        var joiner = second.RunAsync("key", Factory);
+
+        release.SetResult();
+        var values = await Task.WhenAll(owner, joiner);
+
+        first.Should().BeSameAs(second);
+        calls.Should().Be(1);
+        values.Should().OnlyContain(v => v == 7);
+    }
+
+    [Fact]
+    public async Task ServiceCollection_CanResolveClosedGenericSingleFlightGroupInterface()
+    {
+        var services = new ServiceCollection();
+        services.AddSingleton<ISingleFlightGroup<User>, SingleFlightGroup<User>>();
+
+        using var provider = services.BuildServiceProvider();
+        var group = provider.GetRequiredService<ISingleFlightGroup<User>>();
+        var user = new User("ada");
+
+        var value = await group.RunAsync("user:ada", () => Task.FromResult(user));
+
+        value.Should().BeSameAs(user);
     }
 
     [Fact]
@@ -176,4 +239,6 @@ public class SingleFlightGroupTests
         await FluentActions
             .Awaiting(() => new SingleFlightGroup<int>().RunDetailedAsync("key", null!))
             .Should().ThrowAsync<ArgumentNullException>();
+
+    private sealed record User(string Name);
 }
